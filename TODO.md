@@ -6,10 +6,10 @@
 - [x] Enable vertical blanking interrupt before entering main loop
 - [x] Animate background colour in vertical blank interrupt handler https://blog.bigevilcorporation.co.uk/2012/03/23/sega-megadrive-4-hello-world/
 - [x] Compile test.c file to M68K machine code with VBCC (vc.exe)
+- [x] Test: INCBIN binary test.o into ROM and call IncLong routine
 
 # TODO
 
-- [ ] Test: INCBIN binary test.b into ROM and call Inc routine
 - [ ] Link (vbcc-compiled) test.o into ROM with VLINK
   - Modify vc.cfg assembler output format from -Fbin to -Felf
   - Modify ROM to build as elf

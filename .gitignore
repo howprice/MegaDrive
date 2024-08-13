@@ -1,4 +1,6 @@
 build/
 tmp/
+
+# TODO: Add these iff required
 tools/vbcc/bin/vobjdump.exe
 tools/vbcc/bin/vprof.exe
