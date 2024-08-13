@@ -8,6 +8,8 @@ PALETTE_SIZE_LONGWORDS  EQU     PALETTE_COLOUR_COUNT/2
 VDP_DATA_PORT           EQU     $C00000
 VDP_CONTROL_PORT        EQU     $C00004
 
+RAM_ADDRESS             EQU     $FF0000
+
 ; ------------------------------------------------------------------
 ; Handy macros
 ; ------------------------------------------------------------------
@@ -23,6 +25,17 @@ SET_VDP_REG     MACRO
 SET_CRAM_WRITE_ADDRESS  MACRO
                         move.l    #($C0<<24)!((\1)<<16),VDP_CONTROL_PORT
                         ENDM
+
+; ------------------------------------------------------------------
+; Variables
+; ------------------------------------------------------------------
+
+                RSRESET
+FrameIndex:     RS.L            1
+Vars_sizeof:    RS.W            1
+
+; Store variables at start of RAM
+VARS_ADDRESS    EQU     RAM_ADDRESS
 
 ; ------------------------------------------------------------------
 ; Sega Megadrive ROM header
@@ -202,6 +215,8 @@ Main:
         ; Register 7 is the background colour. Bits 5:4 palette index, bits 3:0 colour index
         SET_VDP_REG     7,$08  ; Set background colour to palette 0, colour 8
 
+        lea     VARS_ADDRESS,a5
+
         ; Enable vertical blanking interrupt
         move.w   #$2000,sr      ; enable interrupts at CPU level. Vertical interrupt is 68000 level 6
         SET_VDP_REG     1,$64   ; Enable V interrupt at system level
@@ -213,9 +228,14 @@ HBlankInterrupt:
         rte
 
 VBlankInterrupt:
-        ; TODO: Animate the background colour
-        nop
-        nop
+        ; Cycle background colour through palette 0
+        lea     FrameIndex(a5),a0
+        move.l  (a0),d0
+        lsr.w   #4,d0           ; cycle every 16 frames
+        andi.w  #$f,d0          ; 16 colours per palette, palette 0
+        ori.w   #$8700,d0       ; set register 7, background colour
+        move.w  d0,VDP_CONTROL_PORT
+        addq.l  #1,(a0)
         rte
 
 Exception:
