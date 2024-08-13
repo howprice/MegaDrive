@@ -8,3 +8,4 @@ Driver: Hoffman uses XGM music driver with 4 channel sfx
 
 - [Big Evil Corporation Megadrive Tutorial](https://blog.bigevilcorporation.co.uk/2012/02/28/sega-megadrive-1-getting-started/)
 - [Sega Mega Drive memory map](https://segaretro.org/Sega_Mega_Drive/Memory_map)
+- [Official Sega Genesis Technical Overview](http://xi6.com/files/sega2f.html)
