@@ -4,6 +4,11 @@ Goal: Build a ROM, written in assembly language using the SGDK driver to play au
 
 Driver: Hoffman uses XGM music driver with 4 channel sfx
 
+# Emulator
+
+- MAME is good for single stepping through the code
+- [Regen](http://aamirm.hacking-cult.org/www/regen.html) *debugger build* e.g. Regen 0.972*D*
+
 # References
 
 - [Big Evil Corporation Megadrive Tutorial](https://blog.bigevilcorporation.co.uk/2012/02/28/sega-megadrive-1-getting-started/)
