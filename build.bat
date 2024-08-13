@@ -17,11 +17,21 @@ echo:
 echo Compilation succeeded
 
 echo Assembling ROM...
-tools\vasm\Windows\x64\vasmm68k_mot -Fbin -no-opt -nosym -L build\ROM.lst -o build\ROM.gen src\ROM.s || exit /b 1
+tools\vasm\Windows\x64\vasmm68k_mot -Felf -no-opt -o build\ROM.o src\ROM.s || exit /b 1
 
 echo:
 echo Assembling succeeded
 
-rem TODO: Link ROM and C object file with vlink -belf32m68k
+echo:
+echo Linking...
+rem The file format of an input object file is determined automatically by the linker. 
+rem The default output file format is compiled in (see -v) and may be changed by -b.
+rem TODO: Link ROM object file and C object file
+rem For target file format rawbin1, The sections and base addresses have to be specified by a linker script (option -T).
+rem TODO: Why is -wfail Unrecognized? I've used it in the past
+vlink -b rawbin1 -T ROM.ls -o build\ROM.gen build\ROM.o build\test.o || exit /b 1
+
+echo:
+echo Linking succeeded
 
 exit /b 0

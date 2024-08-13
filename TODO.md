@@ -10,10 +10,9 @@
 
 # TODO
 
-- [ ] Link (vbcc-compiled) test.o into ROM with VLINK
-  - Modify vc.cfg assembler output format from -Fbin to -Felf
-  - Modify ROM to build as elf
-  - Add linker script to layout final ROM binary image
+- [ ] Link (vbcc-compiled) test.o and ROM.o elf object files with VLINK
+  - [ ] Call IncLong from ROM.s. May need XREF directive
+
 - [ ] Compile .c file with GCC
 - [ ] Use register equates and macros from https://github.com/sroccaserra/learning-megadrive/blob/master/src/system.asm
 - [ ] Check Z80 code disassembly in mame matches https://bumbershootsoft.wordpress.com/2018/03/02/the-sega-genesis-startup-code/
