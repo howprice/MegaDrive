@@ -16,5 +16,5 @@ SECTIONS
     .ROM : { ROM.o(CODE) }
 
     /* Add a section containing the code from test.o */
-    /*.test : { test.o(CODE) }*/
+    .test : { test.o(CODE) }
 }

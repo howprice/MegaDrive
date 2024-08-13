@@ -1,10 +1,4 @@
 ; ------------------------------------------------------------------
-; Debug equates
-; ------------------------------------------------------------------
-
-INCBIN_RAW_BINARY       EQU     0
-
-; ------------------------------------------------------------------
 ; Hardware equates
 ; ------------------------------------------------------------------
 
@@ -241,8 +235,8 @@ VBlankInterrupt:
         andi.w  #$f,d0          ; 16 colours per palette, palette 0
         ori.w   #$8700,d0       ; set register 7, background colour
         move.w  d0,VDP_CONTROL_PORT
-        IF INCBIN_RAW_BINARY
-        bsr     IncLong
+        IF 1
+        jsr     @IncLong         ; can't use bsr, because symbol not defined yet
         ELSE
         addq.l  #1,(a0)
         ENDIF
@@ -250,17 +244,6 @@ VBlankInterrupt:
 
 Exception:
         rte
-
-;---------------------------------------------------------------------------------------------
-; TEST: Call routine from assembled binary
-        IF INCBIN_RAW_BINARY
-        nop     ; a few nops to make it easier to find in the disassembly
-        nop
-        nop
-; A0 = pointer to longword to increment
-IncLong:
-        INCBIN "../build/test.o"
-        ENDIF
 
 ;---------------------------------------------------------------------------------------------
 ; Z80 machine code from https://blog.bigevilcorporation.co.uk/2012/03/09/sega-megadrive-3-awaking-the-beast/
