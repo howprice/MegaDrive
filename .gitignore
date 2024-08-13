@@ -1,2 +1,4 @@
 build/
 tmp/
+tools/vbcc/bin/vobjdump.exe
+tools/vbcc/bin/vprof.exe
