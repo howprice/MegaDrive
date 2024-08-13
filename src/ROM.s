@@ -202,14 +202,20 @@ Main:
         ; Register 7 is the background colour. Bits 5:4 palette index, bits 3:0 colour index
         SET_VDP_REG     7,$08  ; Set background colour to palette 0, colour 8
 
-.mainLoop:       
-        ; TODO: Animate the background colour
+        ; Enable vertical blanking interrupt
+        move.w   #$2000,sr      ; enable interrupts at CPU level. Vertical interrupt is 68000 level 6
+        SET_VDP_REG     1,$64   ; Enable V interrupt at system level
+
+.mainLoop: 
         bra.s   .mainLoop
- 
+        
 HBlankInterrupt:
         rte
 
 VBlankInterrupt:
+        ; TODO: Animate the background colour
+        nop
+        nop
         rte
 
 Exception:
@@ -242,8 +248,8 @@ PSG_INIT_DATA_SIZE_BYTES EQU *-PSGInitData
 
 ; From https://blog.bigevilcorporation.co.uk/2012/03/09/sega-megadrive-3-awaking-the-beast/
 VDPRegInitData:
-        dc.b $04 ; 0: Mode set register 1. Bit 5 IE1 Enable Horiz. interrupt. Bit 2 must be set, Bit 1: M3 HV. counter stop 1=disable. Others zero
-        dc.b $44 ; 1: Mode set register 2. Bit 6: Display enable. Vert. interrupt on, display on, DMA on, V28 mode (28 cells vertically), + bit 2
+        dc.b $04 ; 0: Mode set register 1. Bit 4: IE1 Horizontal interrupt enable (68000 LV 4). Bit 2 must be set, Bit 1: M3 HV. counter stop 1=disable. Others zero
+        dc.b $44 ; 1: Mode set register 2. Bit 6: Display enable. display on, DMA off, V28 mode (28 cells vertically), + bit 2
         dc.b $30 ; 2: Pattern table for Scroll Plane A at 0xC000 (bits 3-5)
         dc.b $40 ; 3: Pattern table for Window Plane at 0x10000 (bits 1-5)
         dc.b $05 ; 4: Pattern table for Scroll Plane B at 0xA000 (bits 0-2)
