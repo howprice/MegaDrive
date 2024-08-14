@@ -9,6 +9,7 @@ VDP_DATA_PORT           EQU     $C00000
 VDP_CONTROL_PORT        EQU     $C00004
 
 RAM_ADDRESS             EQU     $FF0000
+RAM_SIZE_BYTES          EQU     $10000
 
 ; ------------------------------------------------------------------
 ; Handy macros
@@ -34,12 +35,12 @@ SET_CRAM_WRITE_ADDRESS  MACRO
 FrameIndex:     RS.L            1
 Vars_sizeof:    RS.W            1
 
-; Store variables at start of RAM
-VARS_ADDRESS    EQU     RAM_ADDRESS
+        SECTION ROM_HEADER,DATA
 
 ; ------------------------------------------------------------------
 ; Sega Megadrive ROM header
 ; ------------------------------------------------------------------
+RomHeader:
         dc.l   $00FFE000       ; Initial SSP
         dc.l   EntryPoint      ; Initial PC
         dc.l   Exception       ; Bus error
@@ -125,7 +126,13 @@ VARS_ADDRESS    EQU     RAM_ADDRESS
         dc.b "                                        "         ; Notes (unused)
         dc.b "JUE             "                                 ; Country codes
 
+;	PRINTT "ROM header size (bytes):"
+;	PRINTV *-RomHeader
+        ASSERT *-RomHeader==512,"Expect ROM header to be 512 bytes"
+
 ;---------------------------------------------------------------------------------------------
+
+        SECTION CODE,CODE
 
 EntryPoint:
         move.w  #$2700,sr       ; supervisor mode, disable interrupts
@@ -136,13 +143,15 @@ EntryPoint:
         tst.w   $A1000C
         bne     Main
 
-        ; Clear RAM. 64 KiB of general purpose 68000 RAM at address FF0000-FFFFFF
-        moveq   #0,d0           ; Clear val and starting address         ; TEST: TODO: Change back to 0
+        ; Clear all RAM. FF0000-FFFFFF (64 KiB)
+        ; n.b. Do not move this into subroutine because the stack will also be cleared!
+        ; Taks care: This is responsibe for clearing BSS too, so systems should initialise their own BSS vars.
+        moveq   #0,d0           ; Clear val and starting address
         movea.l d0,a0           ; Zero from address 0 backwards with pre-decrement
-        move.l #$4000-1,d1      ; Clearing 64k's worth of longwords (minus 1, for dbra loop
+        move.l  #(RAM_SIZE_BYTES/4)-1,d1     ; Longword count, -1 for dbra
 .clear:
-        move.l d0,-(a0)
-        dbra d1,.clear
+        move.l  d0,-(a0)
+        dbra    d1,.clear
 
         ; Set TMSS Trade Mark Security Signature on second revision hardware
         move.b  $A10001,d0      ; Move Megadrive hardware version to d0
@@ -215,7 +224,7 @@ Main:
         ; Register 7 is the background colour. Bits 5:4 palette index, bits 3:0 colour index
         SET_VDP_REG     7,$08  ; Set background colour to palette 0, colour 8
 
-        lea     VARS_ADDRESS,a5
+        lea     Variables,a5
 
         ; Enable vertical blanking interrupt
         move.w   #$2000,sr      ; enable interrupts at CPU level. Vertical interrupt is 68000 level 6
@@ -244,6 +253,9 @@ VBlankInterrupt:
 
 Exception:
         rte
+
+        ; TEST: Call a function from libmd
+;       jsr     XGM_loadDriver
 
 ;---------------------------------------------------------------------------------------------
 ; Z80 machine code from https://blog.bigevilcorporation.co.uk/2012/03/09/sega-megadrive-3-awaking-the-beast/
@@ -325,4 +337,21 @@ Palette:
 
 RomEnd:    ; Very last line, end of ROM address
 ; TODO: Assert that ROM does not exceed maximum size
+
+;---------------------------------------------------------------------------------------------
+; Initialised data section
+        SECTION DATA,DATA
+
+        dc.l   $11111111
+
+;---------------------------------------------------------------------------------------------
+; Uninitialisd data section
+        SECTION BSS,BSS
+
+; n.b. Can't use fixed (ORG) address for variables, because have to co-exist in RAM with rw data
+; from other modules (e.g. test.s and libmd.a) in the final linked image 
+Variables:
+        dcb.b   Vars_sizeof
+;---------------------------------------------------------------------------------------------
+
         END
