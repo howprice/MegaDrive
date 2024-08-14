@@ -254,8 +254,11 @@ VBlankInterrupt:
 Exception:
         rte
 
-        ; TEST: Call a function from libmd
-;       jsr     XGM_loadDriver
+;---------------------------------------------------------------------------------------------
+; TEST: Calling a function from libmd causes the linker to pull in the each transient dependency
+; from the library, increasing the ROM size. This is a test to see how much it increases by.
+;       jsr     random         ; Increasees ROM size by 854C0 bytes
+        jsr     XGM_loadDriver ; Increasees ROM size by 85590 bytes
 
 ;---------------------------------------------------------------------------------------------
 ; Z80 machine code from https://blog.bigevilcorporation.co.uk/2012/03/09/sega-megadrive-3-awaking-the-beast/

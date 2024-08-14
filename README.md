@@ -9,6 +9,10 @@ Driver: Hoffman uses XGM music driver with 4 channel sfx
 - MAME is good for single stepping through the code
 - [Regen](http://aamirm.hacking-cult.org/www/regen.html) *debugger build* e.g. Regen 0.972*D*
 
+# Tools
+
+- [objdump](https://web.mit.edu/gnu/doc/html/binutils_5.html) - Display information from object files. Windows exe in SGDK
+
 # References
 
 - [Big Evil Corporation Megadrive Tutorial](https://blog.bigevilcorporation.co.uk/2012/02/28/sega-megadrive-1-getting-started/)

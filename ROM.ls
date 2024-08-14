@@ -13,7 +13,8 @@ OUTPUT_FORMAT(binary) /* Used by GNU linker ld. vlink uses -b option instead */
 MEMORY
 {
     /* ROM memory region */
-	rom (rx) : ORIGIN = 0x000000, LENGTH = 512K
+    /* I think 4 MiB is correct */
+	rom (rx) : ORIGIN = 0x000000, LENGTH = 4M
 
     /* RAM memory region */
     /* Sega Mega Drive has 64K of RAM at FF0000-FFFFFF */
@@ -37,9 +38,9 @@ SECTIONS
     /* Output .text section at relocation address 0*/
     .text 0x00000000 + SIZEOF (RomHeader) : 
     { 
-        *(CODE)         /* CODE from custom assembly and C files: ROM.o, text.o ... */
-        *(.text)        /* .text sections from C libraries (libmd, libgcc) */
-        *(.rodata*)     /* Read-only data sections from the C libraries */
+        *(CODE)                 /* CODE from custom assembly and C files: ROM.o, text.o ... */
+        *(.text.* .text)        /* .text sections from C libraries (libmd, libgcc) */
+        *(.rodata .rodata.*)    /* Read-only data sections from the C libraries */
 
         /* Define symbol at end of .text section */
         /* Can be used to copy succeeding data from ROM to RAM. See https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html#SEC21 */

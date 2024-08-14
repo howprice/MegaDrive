@@ -1,6 +1,8 @@
 # TODO
 
-- [ ] Try to link against libmd.a with gcc (ld)
+- [ ] Try to discard unused functions from libmd and libgcc https://unix.stackexchange.com/a/715901
+  - libgcc.a is prebuilt and 301 KB. libmd.a is built locally and is 3.64 MB
+  
 - [ ] Refactor game.s out of ROM.s, and give it its own CODE, DATA and BSS SECTIONS
 
 - [ ] Is there anything in the SGDK md.ld that is required? 

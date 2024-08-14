@@ -33,9 +33,9 @@ rem TODO: Why is -wfail Unrecognized? I've used it in the past
 rem vlink -b rawbin1 -T ROM.ls -o build\ROM.gen -Mbuild\ROM.map build\ROM.o build\test.o || exit /b 1
 
 rem Try linking with GNU linker ld
-tools\ld -o build/ROM.gen -T ROM.ls -Map build/ROM.map build/test.o build/ROM.o || exit /b 1
-
-rem TODO: Link against libmd: -L lib -l libgcc -l libmd
+rem Note: -l surrounds library with lib and .a
+rem Note: libmd must be listed *before* libgcc because the the library that needs symbols must be first, then the library that resolves the symbol. See https://stackoverflow.com/a/409470/5425146
+tools\ld -o build/ROM.gen -T ROM.ls -Map build/ROM.map build/test.o build/ROM.o -L lib -l md -l gcc || exit /b 1
 
 echo Linking succeeded
 
