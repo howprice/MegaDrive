@@ -1,4 +1,10 @@
 ; ------------------------------------------------------------------
+; DEBUG
+; ------------------------------------------------------------------
+
+USE_SGDK_RANDOM EQU 1
+
+; ------------------------------------------------------------------
 ; Hardware equates
 ; ------------------------------------------------------------------
 
@@ -148,10 +154,19 @@ EntryPoint:
         ; Taks care: This is responsibe for clearing BSS too, so systems should initialise their own BSS vars.
         moveq   #0,d0           ; Clear val and starting address
         movea.l d0,a0           ; Zero from address 0 backwards with pre-decrement
-        move.l  #(RAM_SIZE_BYTES/4)-1,d1     ; Longword count, -1 for dbra
+        move.w  #(RAM_SIZE_BYTES/4)-1,d1     ; Longword count, -1 for dbra
 .clear:
         move.l  d0,-(a0)
         dbra    d1,.clear
+
+        ; Copy (initialised) data from ROM to RAM
+        lea     _etext,a0       ; Symbol defined in linker script. Will be resolved by the linker
+        lea     RAM_ADDRESS,a1  ; dst
+        move.w  #_sdata,d0       ; Number of bytes to copy. Symbol defined in linker script. Will be resolved by the linker
+        subq.w  #1,d0           ; -1 for dbra
+.copyLoop:
+        move.b  (a0)+,(a1)+
+        dbra    d0,.copyLoop
 
         ; Set TMSS Trade Mark Security Signature on second revision hardware
         move.b  $A10001,d0      ; Move Megadrive hardware version to d0
@@ -237,18 +252,28 @@ HBlankInterrupt:
         rte
 
 VBlankInterrupt:
-        ; Cycle background colour through palette 0
+        ; Increment frame index
         lea     FrameIndex(a5),a0
-        move.l  (a0),d0
+        move.l  (a0),d0         ; frame index
+        jsr     @IncLong        ; call C function from our custom tools.c file
+
+        IF USE_SGDK_RANDOM ; cycle using random() C func from libmd.a
+        ; change BG colour every 16 frames
+        andi.w  #$f,d0
+        bne.s   .skip
+
+        ; Cycle background colour through palette 0
+        jsr     random          ; Call SGDK function (tools.c). Returns random number in D0. Symbol resolved by linker
+        
+        ELSE ; cycle using frame index
         lsr.w   #4,d0           ; cycle every 16 frames
+        
+        ENDIF
+
         andi.w  #$f,d0          ; 16 colours per palette, palette 0
         ori.w   #$8700,d0       ; set register 7, background colour
         move.w  d0,VDP_CONTROL_PORT
-        IF 1
-        jsr     @IncLong         ; can't use bsr, because symbol not defined yet
-        ELSE
-        addq.l  #1,(a0)
-        ENDIF
+.skip        
         rte
 
 Exception:
@@ -257,8 +282,8 @@ Exception:
 ;---------------------------------------------------------------------------------------------
 ; TEST: Calling a function from libmd causes the linker to pull in the each transient dependency
 ; from the library, increasing the ROM size. This is a test to see how much it increases by.
-;       jsr     random         ; Increasees ROM size by 854C0 bytes
-        jsr     XGM_loadDriver ; Increasees ROM size by 85590 bytes
+;       jsr     random         ; Increases ROM size by 854C0 bytes
+;       jsr     XGM_loadDriver ; Increases ROM size by 85590 bytes
 
 ;---------------------------------------------------------------------------------------------
 ; Z80 machine code from https://blog.bigevilcorporation.co.uk/2012/03/09/sega-megadrive-3-awaking-the-beast/
@@ -320,21 +345,21 @@ VDP_REG_DATA_SIZE_BYTES EQU *-VDPRegInitData
 ; Least significant bit of each channel is unused
 Palette:
         dc.w $0000 ; Colour 0 - Transparent
-        dc.w $000E ; Colour 1 - Red
-        dc.w $00E0 ; Colour 2 - Green
-        dc.w $0E00 ; Colour 3 - Blue
-        dc.w $0000 ; Colour 4 - Black
-        dc.w $0EEE ; Colour 5 - White
-        dc.w $00EE ; Colour 6 - Yellow
-        dc.w $008E ; Colour 7 - Orange
-        dc.w $0E0E ; Colour 8 - Pink
-        dc.w $0808 ; Colour 9 - Purple
-        dc.w $0444 ; Colour A - Dark grey
-        dc.w $0888 ; Colour B - Light grey
-        dc.w $0EE0 ; Colour C - Turquoise
-        dc.w $000A ; Colour D - Maroon
-        dc.w $0600 ; Colour E - Navy blue
-        dc.w $0060 ; Colour F - Dark green
+        dc.w $0002 ; Colour 1 - Red
+        dc.w $0004 ; Colour 2 - Green
+        dc.w $0006 ; Colour 3 - Blue
+        dc.w $0008 ; Colour 4 - Black
+        dc.w $000a ; Colour 5 - White
+        dc.w $000c ; Colour 6 - Yellow
+        dc.w $000e ; Colour 7 - Orange
+        dc.w $0000 ; Colour 8 - Pink
+        dc.w $0020 ; Colour 9 - Purple
+        dc.w $0040 ; Colour A - Dark grey
+        dc.w $0060 ; Colour B - Light grey
+        dc.w $0080 ; Colour C - Turquoise
+        dc.w $00A0 ; Colour D - Maroon
+        dc.w $00c0 ; Colour E - Navy blue
+        dc.w $00e0 ; Colour F - Dark green
 
 ;---------------------------------------------------------------------------------------------
 
