@@ -26,18 +26,24 @@ rem tools\objdump --section-headers build\game.o
 
 echo Linking
 rem The file format of an input object file is determined automatically by the linker. 
-rem The default output file format is compiled in (see -v) and may be changed by -b.
+rem The default output file format is compiled in to vlink (see -v) and may be changed by -b.
 rem For target file format rawbin1, The sections and base addresses have to be specified by a linker script (option -T).
 rem -M generates a map file
 rem TODO: Why is -wfail Unrecognized? I've used it in the past
 rem vlink -b rawbin1 -T ROM.ls -o build\ROM.gen -Mbuild\ROM.map build\ROM.o build\test.o || exit /b 1
 
-rem Try linking with GNU linker ld
+rem Link with GNU linker ld
 rem Note: -l surrounds library with lib and .a
 rem Note: libmd must be listed *before* libgcc because the the library that needs symbols must be first, then the library that resolves the symbol. See https://stackoverflow.com/a/409470/5425146
-tools\ld -o build/ROM.gen -T ROM.ls -Map build/ROM.map build/test.o build/ROM.o -L lib -l md -l gcc || exit /b 1
+rem Use --gc-sections to remove unused sections. This reduces the size of the binary significantly. See https://unix.stackexchange.com/a/715901
+rem Unfortunately, GNU ld ignores --gc-sections with OUTPUT_FORMAT(binary), so using elf32-m68k as intermediate format.
+rem Can use --print-gc-sections to see what sections are removed, but it produces a lot of output.
+tools\ld -o build/ROM.elf -T ROM.ls -Map build/ROM.map build/ROM.o build/test.o -L lib -l md -l gcc --gc-sections || exit /b 1
 
 echo Linking succeeded
+
+echo Extracting binary from elf
+tools\objcopy -O binary build/ROM.elf build/ROM.gen || exit /b 1
 
 echo Build succeeded
 

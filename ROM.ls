@@ -8,7 +8,10 @@ See [Using ld The GNU linker](https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_
 Example linker script: http://dark-matter.me.uk/files/diagrom.ls by jaycee1980
 */
 
-OUTPUT_FORMAT(binary) /* Used by GNU linker ld. vlink uses -b option instead */
+/* Unfortunately, GNU ld ignores --gc-sections with OUTPUT_FORMAT(binary) https://stackoverflow.com/a/48286388/5425146 */
+/* This is no good, because it means most of libmd is included in the ROM, even if it's not used. */
+/* To list formats supported by ld.exe, use ld --help and search for "supported targets" and "supported emulations" */
+OUTPUT_FORMAT(elf32-m68k) /* Used by GNU linker ld. vlink uses -b option instead */
 
 MEMORY
 {
@@ -24,22 +27,29 @@ MEMORY
 
 /*
 The SECTIONS block defines the mapping of input sections to output sections, as well as
- their location in memory.
+their location in memory.
+
+Use KEEP to keep essential sections that may not be referenced and do not want to be discarded 
+by --gc-sections. Sections linked in from libmd are free to be discarded if not referenced.
+
 */
 SECTIONS
 {
     /* ROM header must come first */
     RomHeader 0x00000000 :
     {
-        
-        *(ROM_HEADER)
+        KEEP(*(ROM_HEADER))
     } >rom
 
-    /* Output .text section at relocation address 0*/
+    /* Output .text section at relocation address 0 */
     .text 0x00000000 + SIZEOF (RomHeader) : 
-    { 
-        *(CODE)                 /* CODE from custom assembly and C files: ROM.o, text.o ... */
-        *(.text.* .text)        /* .text sections from C libraries (libmd, libgcc) */
+    {
+        /* --gc-sections requires an entry point to strip unused sections: 'start' symbol or first byte of .text section. */
+        /* See https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html#SEC24 */
+        KEEP(*(ROM_ENTRY))      /* ROM.s entry point code */
+
+        KEEP(*(CODE))           /* CODE from other assembly and C files: e.g. text.o ... */
+        *(.text .text.*)        /* .text sections from C libraries (libmd, libgcc) */
         *(.rodata .rodata.*)    /* Read-only data sections from the C libraries */
 
         /* Define symbol at end of .text section */
@@ -62,8 +72,8 @@ SECTIONS
     .data 0xFF0000 : 
     AT( ADDR (.text) + SIZEOF (.text) )
     {
-        *(DATA)        /* DATA sections from assembly files e.g. ROM.o, GAME.o */
-        *(.data)       /* .data sections from C libraries (libmd, libgcc) */
+        KEEP(*(DATA))      /* DATA sections from assembly files e.g. ROM.o, GAME.o */
+        *(.data .data.*)   /* .data sections from C libraries (libmd, libgcc) */
     } >ram
     _sdata = SIZEOF (.data); /* Size of output data section. Symbol required by SGDK */
 
@@ -73,8 +83,8 @@ SECTIONS
     /* The runtime must zero this section before use (boot code clears all of RAM) */
     .bss 0xFF0000 + SIZEOF (.data) : 
     { 
-        *(BSS)      /* BSS sections from assembly files e.g. ROM.o, GAME.o */
-        *(.bss)     /* .bss sections from C libraries (libmd, libgcc) */
+        KEEP(*(BSS))    /* BSS sections from assembly files e.g. ROM.o, GAME.o */
+        *(.bss)         /* .bss sections from C libraries (libmd, libgcc) */
 
         _bend = . ; /* Define symbol at end of .bss section. Required by SGDK. */
     } >ram

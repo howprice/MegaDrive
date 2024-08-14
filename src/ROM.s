@@ -2,6 +2,7 @@
 ; DEBUG
 ; ------------------------------------------------------------------
 
+USE_TEST_C      EQU 1
 USE_SGDK_RANDOM EQU 1
 
 ; ------------------------------------------------------------------
@@ -48,7 +49,7 @@ Vars_sizeof:    RS.W            1
 ; ------------------------------------------------------------------
 RomHeader:
         dc.l   $00FFE000       ; Initial SSP
-        dc.l   EntryPoint      ; Initial PC
+        dc.l   start           ; Initial PC
         dc.l   Exception       ; Bus error
         dc.l   Exception       ; Address error
         dc.l   Exception       ; Illegal instruction
@@ -138,9 +139,11 @@ RomHeader:
 
 ;---------------------------------------------------------------------------------------------
 
-        SECTION CODE,CODE
+        SECTION ROM_ENTRY,CODE
 
-EntryPoint:
+; The entry point doesn't have to be called 'start', but this symbol can be picked up by the
+; linker when performing garbage collection to remove unused sections.
+start:
         move.w  #$2700,sr       ; supervisor mode, disable interrupts
 
         ; Branch straight to main if this is a soft reset
@@ -255,7 +258,11 @@ VBlankInterrupt:
         ; Increment frame index
         lea     FrameIndex(a5),a0
         move.l  (a0),d0         ; frame index
+        IF USE_TEST_C
         jsr     @IncLong        ; call C function from our custom tools.c file
+        ELSE
+        addq.l  #1,(a0)         ; increment frame index
+        ENDIF
 
         IF USE_SGDK_RANDOM ; cycle using random() C func from libmd.a
         ; change BG colour every 16 frames
@@ -280,10 +287,9 @@ Exception:
         rte
 
 ;---------------------------------------------------------------------------------------------
-; TEST: Calling a function from libmd causes the linker to pull in the each transient dependency
-; from the library, increasing the ROM size. This is a test to see how much it increases by.
-;       jsr     random         ; Increases ROM size by 854C0 bytes
-;       jsr     XGM_loadDriver ; Increases ROM size by 85590 bytes
+; Calling a function from libmd causes the linker to pull in the each transient dependency
+; from the library, increasing the ROM size. 
+;        jsr     XGM_loadDriver
 
 ;---------------------------------------------------------------------------------------------
 ; Z80 machine code from https://blog.bigevilcorporation.co.uk/2012/03/09/sega-megadrive-3-awaking-the-beast/
