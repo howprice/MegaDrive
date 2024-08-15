@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build",
+            "label": "Build with GNU toolchain",
             "type": "process",
-            "command": "build.bat",
+            "command": "build_gnu.bat",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
@@ -22,9 +22,27 @@
             }
         },
         {
-            "label": "Run",
+            "label": "Build with VBCC toolchain",
+            "type": "process",
+            "command": "build_vbcc.bat",
+            "problemMatcher": [],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "Run GNU build",
             "type": "process",
             "command": "run.bat",
+            "args": [
+                "build_gnu"
+            ],
             "problemMatcher": [],
             "presentation": {
                 "echo": true,
@@ -36,9 +54,48 @@
             }
         },
         {
-            "label": "Debug",
+            "label": "Run VBCC build",
             "type": "process",
-            "command": "debug.bat",
+            "command": "run.bat",
+            "args": [
+                "build_vbcc"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "Debug GNU build",
+            "type": "process",
+            "command": "run.bat",
+            "args": [
+                "build_gnu",
+                "debug"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "Debug VBCC build",
+            "type": "process",
+            "command": "run.bat",
+            "args": [
+                "build_vbcct",
+                "debug"
+            ],
             "problemMatcher": [],
             "presentation": {
                 "echo": true,

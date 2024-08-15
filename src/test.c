@@ -1,7 +1,22 @@
-static int s_testData = 0x22222222;  // This will be in the DATA section
-static int s_testBSS; // This will be in the BSS section
+// Initialised data goes in the DATA section
+// n.b. Must initialise to non-zero value, otherwise it goes in BSS
+static int s_incCountData = 1;  
+static int s_decCountData = 1;  
 
-void IncLong(int *a) 
+// Uninitialised data goes in the BSS section
+static int s_incCountBSS; 
+static int s_decCountBSS; 
+
+void IncLong(int *pVal) 
 {
-	*a += 1;
+	*pVal += 1;
+	s_incCountData++;
+	s_incCountBSS++;
+}
+
+void DecLong(int *pVal) 
+{
+	*pVal -= 1;
+	s_decCountData++;
+	s_decCountBSS++;
 }

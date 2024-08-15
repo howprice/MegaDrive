@@ -8,11 +8,6 @@ See [Using ld The GNU linker](https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_
 Example linker script: http://dark-matter.me.uk/files/diagrom.ls by jaycee1980
 */
 
-/* Unfortunately, GNU ld ignores --gc-sections with OUTPUT_FORMAT(binary) https://stackoverflow.com/a/48286388/5425146 */
-/* This is no good, because it means most of libmd is included in the ROM, even if it's not used. */
-/* To list formats supported by ld.exe, use ld --help and search for "supported targets" and "supported emulations" */
-OUTPUT_FORMAT(elf32-m68k) /* Used by GNU linker ld. vlink uses -b option instead */
-
 MEMORY
 {
     /* ROM memory region */
@@ -35,14 +30,16 @@ by --gc-sections. Sections linked in from libmd are free to be discarded if not 
 */
 SECTIONS
 {
-    /* ROM header must come first */
-    RomHeader 0x00000000 :
+    /* Output RomHeader section at start of binary (relocation address 0) */
+    RomHeader :
     {
         KEEP(*(ROM_HEADER))
+
+        ASSERT(. == 512, "ROM header must be 512 bytes long");
     } >rom
 
-    /* Output .text section at relocation address 0 */
-    .text 0x00000000 + SIZEOF (RomHeader) : 
+    /* Output .text section immediately following header (offset 512) */
+    .text : 
     {
         /* --gc-sections requires an entry point to strip unused sections: 'start' symbol or first byte of .text section. */
         /* See https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html#SEC24 */
@@ -57,6 +54,9 @@ SECTIONS
         /* Not actually used by SGDK */
         _etext = .;
 
+        /* vlink Error 112: libmd.a(xgm.o) (.text.XGM_stopPlay+0xeba2): Cannot resolve reference to stop_xgm, because section .rodata_bin was not recognized by the linker script. */
+        *(.rodata_bin)
+
         /* Redundant assert. If the combined output sections directed to a region are too big for the region, the linker will issue an error message. */ 
         /* See https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html#SEC16 */
         /* ASSERT(. - ORIGIN(rom) <= LENGTH(rom), "ROM overflowed!"); */
@@ -70,21 +70,23 @@ SECTIONS
     /* See https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html#SEC21 and VASM manual */
     /* TODO: Why does AT() cause VLINK INTERNAL ERROR: next_pattern(): PHDR  load missing. */
     .data 0xFF0000 : 
-    AT( ADDR (.text) + SIZEOF (.text) )
     {
         KEEP(*(DATA))      /* DATA sections from assembly files e.g. ROM.o, GAME.o */
         *(.data .data.*)   /* .data sections from C libraries (libmd, libgcc) */
-    } >ram
+    } >ram AT>rom
     _sdata = SIZEOF (.data); /* Size of output data section. Symbol required by SGDK */
 
     /* Output .bss section, containing uninitialised data */
     /* Place this after the data section */
     /* TODO: Why does SGDK place this relative to 0xE0FF0000? */
     /* The runtime must zero this section before use (boot code clears all of RAM) */
-    .bss 0xFF0000 + SIZEOF (.data) : 
+    .bss 0xFF0000 + SIZEOF (.data) (NOLOAD) : 
     { 
         KEEP(*(BSS))    /* BSS sections from assembly files e.g. ROM.o, GAME.o */
+        *(.shbss)       /* From SGDK. Not sure when these occur */
         *(.bss)         /* .bss sections from C libraries (libmd, libgcc) */
+        *(.bss.*)       /* .bss sections from C libraries (libmd, libgcc), else vlink Error 112: libmd.a(joy.o) (.text.JOY_update+0x11684): Cannot resolve reference to randomSeedSet, because section .bss.randomSeedSet was not recognized by the linker script. */
+        *(COMMON)       /* COMMON sections from C libraries (libmd, libgcc). Should not be required because GCC defaults to -fno-common. See https://blog.thea.codes/the-most-thoroughly-commented-linker-script/ */
 
         _bend = . ; /* Define symbol at end of .bss section. Required by SGDK. */
     } >ram

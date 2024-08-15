@@ -135,6 +135,7 @@ RomHeader:
 
 ;	PRINTT "ROM header size (bytes):"
 ;	PRINTV *-RomHeader
+RomHeader_sizeof:
         ASSERT *-RomHeader==512,"Expect ROM header to be 512 bytes"
 
 ;---------------------------------------------------------------------------------------------
@@ -142,8 +143,11 @@ RomHeader:
         SECTION ROM_ENTRY,CODE
 
 ; The entry point doesn't have to be called 'start', but this symbol can be picked up by the
-; linker when performing garbage collection to remove unused sections.
-start:
+; GNU linker (ld) when performing garbage collection to remove unused sections.
+; vlink picks up the symbol '_start'
+; n.b. Use double colon to make the labels externally visible (see VASM docs)
+start::
+_start::
         move.w  #$2700,sr       ; supervisor mode, disable interrupts
 
         ; Branch straight to main if this is a soft reset
@@ -257,12 +261,30 @@ HBlankInterrupt:
 VBlankInterrupt:
         ; Increment frame index
         lea     FrameIndex(a5),a0
-        move.l  (a0),d0         ; frame index
         IF USE_TEST_C
-        jsr     @IncLong        ; call C function from our custom tools.c file
-        ELSE
-        addq.l  #1,(a0)         ; increment frame index
+        ; call C function from our custom tools.c file
+
+        IFD __GNUC__
+        ; GCC calling conventinons
+        ; - Functions have their arguments pushed onto the stack before a call, last argument first. (This means within the functions, the arguments are sequential in memory in the order of the function signature.)
+        ; - Every function trashes a0, a1, d0, and d1. All other registers, including the stack pointer, are preserved and will leave the function the same way they entered it.
+        ; - Return values are passed in d0.
+        ; See https://bumbershootsoft.wordpress.com/2018/03/10/variations-on-the-68000-abi/ for more info
+        move.l  a0,-(a7)        ; push arg: frame index pointer
+        jsr     IncLong         ; call C function from our custom tools.c file
+        addq.l  #4,a7           ; restore stack
+        lea     FrameIndex(a5),a0       ; a0 may have been trashed by the C function
+
+        ELSE ; VBCC
+        jsr     @IncLong        ; TODO: Try to configure VBCC to strip @ prefix
+
         ENDIF
+
+        ELSE ; !USE_TEST_C
+        addq.l  #1,(a0)         ; increment frame index manually in assembler
+        ENDIF
+
+        move.l  (a0),d0         ; frame index
 
         IF USE_SGDK_RANDOM ; cycle using random() C func from libmd.a
         ; change BG colour every 16 frames
@@ -289,7 +311,7 @@ Exception:
 ;---------------------------------------------------------------------------------------------
 ; Calling a function from libmd causes the linker to pull in the each transient dependency
 ; from the library, increasing the ROM size. 
-;        jsr     XGM_loadDriver
+;       jsr     XGM_loadDriver
 
 ;---------------------------------------------------------------------------------------------
 ; Z80 machine code from https://blog.bigevilcorporation.co.uk/2012/03/09/sega-megadrive-3-awaking-the-beast/

@@ -1,4 +1,5 @@
-build/
+build_gnu/
+build_vbcc/
 tmp/
 
 # TODO: Add these iff required
