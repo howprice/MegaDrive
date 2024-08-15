@@ -1,9 +1,9 @@
 # TODO
 
-- [ ] Play XGM2 audio
-  - [ ] Modify ROM.s to init XGM2 driver
-  - [ ] Play tune from SGDK
-  - [ ] Convert Hoffman's tara.vgm to XGM2 (with rescomp)
+- [ ] Check correct playpack speed on both PAL and NTSC
+  - Seems to play very slow when Country is set to Europe in Regen
+
+- [ ] Test playing sound effects with XGM2 driver
 
 - [ ] Fix VBCC toolchain build
   - Main issue is -gc-all removing sections marked with KEEP

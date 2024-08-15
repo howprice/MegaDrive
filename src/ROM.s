@@ -41,8 +41,8 @@ SOUND_PCM_RATE_8000     EQU 5 ; See SGDK\inc\snd\pcm\snd_pcm.h #TODO: Is it poss
 
 USE_TEST_C              EQU 1
 USE_SGDK_RANDOM         EQU 1
-PCM_DRIVER_ENABLED      EQU 1
-XGM_DRIVER_ENABLED      EQU 0
+PCM_DRIVER_ENABLED      EQU 0
+XGM_DRIVER_ENABLED      EQU 1
 
 SAMPLE_LENGTH_BYTES     EQU 166912      ; TODO: How to get this from resources.h?
 
@@ -127,8 +127,8 @@ RomHeader:
         
         dc.b "SEGA GENESIS    "                                 ; Console name
         dc.b "(C)SEGA 1992.SEP"                                 ; Copyrght holder and release date
-        dc.b "MEGADRIVE DEMO                                  " ; Domestic name
-        dc.b "MEGADRIVE DEMO                                  " ; International name
+        dc.b "METAL GEAR XGM2 AUDIO DEMO                      " ; Domestic name
+        dc.b "METAL GEAR XGM2 AUDIO DEMO                      " ; International name
         dc.b "GM XXXXXXXX-XX"                                   ; Version number
         dc.w $0000                                              ; Checksum (not read by boot code - don't worry about its value)
         dc.b "J               "                                 ; I/O support
@@ -263,14 +263,14 @@ Main:
         jsr     SND_PCM_loadDriver
         addq.l  #4,a7           ; restore stack
 
-        ; SND_PCM_startPlay(const u8 *sample, const u32 len, const SoundPcmSampleRate rate, const SoundPanning pan, const bool loop);
+        ; 
         ; See SGDK\inc\snd\pcm\snd_pcm.h
         move.l  #1,-(a7)                        ; const bool loop
         move.l  #SOUND_PAN_CENTER,-(a7)         ; const SoundPanning pan 
         move.l  #SOUND_PCM_RATE_8000,-(a7)      ; const SoundPcmSampleRate rate
         move.l  #SAMPLE_LENGTH_BYTES,-(a7)      ; const u32 len should be a multiple of 256
         move.l  #india_8k,-(a7)                 ; const u8 *sample, should be 256 bytes boundary aligned
-        jsr     SND_PCM_startPlay
+        jsr     SND_PCM_startPlay               ; SND_PCM_startPlay(const u8 *sample, const u32 len, const SoundPcmSampleRate rate, const SoundPanning pan, const bool loop);
         adda.l  #20,a7         ; restore stack
 
         ELSE IF XGM_DRIVER_ENABLED
@@ -278,7 +278,13 @@ Main:
         jsr     XGM_loadDriver
         addq.l  #4,a7           ; restore stack
 
-        ; TODO: Use XGM API
+        move.l  #tara_xgm2,-(a7)        ; const u8* song
+        jsr     XGM2_play               ; XGM2_play(const u8 *song);
+        addq.l  #4,a7                   ; restore stack
+
+        ; TODO: Play sound effect (periodically or on button press maybe) with XGM2_playPCM
+
+        ; TODO: Support playing multiple tracks with  XGM2_load(const u8 *song) and XGM2_playTrack(const u16 track)
 
         ENDIF
 
