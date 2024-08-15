@@ -30,14 +30,14 @@ echo Compilation succeeded
 
 rem list sections and symbols in test.o
 bin\objdump --section-headers %BUILD_DIR%\test.o
-bin\nm %BUILD_DIR%\test.o
+bin\nm --numeric-sort %BUILD_DIR%\test.o
 
 echo Assembling ROM.s
 tools\vasm\Windows\x64\vasmm68k_mot -Felf -no-opt -o %BUILD_DIR%\ROM.o src\ROM.s || exit /b 1
 
 rem list sections and symbols in ROM.o
 bin\objdump --section-headers %BUILD_DIR%\ROM.o
-bin\nm %BUILD_DIR%\ROM.o
+bin\nm --numeric-sort %BUILD_DIR%\ROM.o
 
 rem TODO: Add game.s
 rem echo Assembling game.s

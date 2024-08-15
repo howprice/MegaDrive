@@ -1,11 +1,4 @@
 ; ------------------------------------------------------------------
-; DEBUG
-; ------------------------------------------------------------------
-
-USE_TEST_C      EQU 1
-USE_SGDK_RANDOM EQU 1
-
-; ------------------------------------------------------------------
 ; Hardware equates
 ; ------------------------------------------------------------------
 
@@ -33,6 +26,25 @@ SET_VDP_REG     MACRO
 SET_CRAM_WRITE_ADDRESS  MACRO
                         move.l    #($C0<<24)!((\1)<<16),VDP_CONTROL_PORT
                         ENDM
+
+; ------------------------------------------------------------------
+; SGDK constants
+; TODO: Can the toolchain convert C constants be converted to assembler?
+; ------------------------------------------------------------------
+
+SOUND_PAN_CENTER        EQU $C0 ; See SGDK\inc\snd\sound.h #TODO: Is it possible to convert the SoundPanning enum values to assembler?
+SOUND_PCM_RATE_8000     EQU 5 ; See SGDK\inc\snd\pcm\snd_pcm.h #TODO: Is it possible to convert the SoundPcmSampleRate enum values to assembler?
+
+; ------------------------------------------------------------------
+; Application constants
+; ------------------------------------------------------------------
+
+USE_TEST_C              EQU 1
+USE_SGDK_RANDOM         EQU 1
+PCM_DRIVER_ENABLED      EQU 1
+XGM_DRIVER_ENABLED      EQU 0
+
+SAMPLE_LENGTH_BYTES     EQU 166912      ; TODO: How to get this from resources.h?
 
 ; ------------------------------------------------------------------
 ; Variables
@@ -166,10 +178,10 @@ _start::
         move.l  d0,-(a0)
         dbra    d1,.clear
 
-        ; Copy (initialised) data from ROM to RAM
+        ; Copy (initialised) data that follows .text section from ROM to RAM
         lea     _etext,a0       ; Symbol defined in linker script. Will be resolved by the linker
         lea     RAM_ADDRESS,a1  ; dst
-        move.w  #_sdata,d0       ; Number of bytes to copy. Symbol defined in linker script. Will be resolved by the linker
+        move.w  #_sdata,d0      ; Number of bytes to copy. Symbol defined in linker script. Will be resolved by the linker
         subq.w  #1,d0           ; -1 for dbra
 .copyLoop:
         move.b  (a0)+,(a1)+
@@ -246,6 +258,30 @@ Main:
         ; Register 7 is the background colour. Bits 5:4 palette index, bits 3:0 colour index
         SET_VDP_REG     7,$08  ; Set background colour to palette 0, colour 8
 
+        IF PCM_DRIVER_ENABLED
+        move.l  #1,-(a7)        ; push arg: bool waitReady #TODO: Why do we have to push a longword for a bool value?
+        jsr     SND_PCM_loadDriver
+        addq.l  #4,a7           ; restore stack
+
+        ; SND_PCM_startPlay(const u8 *sample, const u32 len, const SoundPcmSampleRate rate, const SoundPanning pan, const bool loop);
+        ; See SGDK\inc\snd\pcm\snd_pcm.h
+        move.l  #1,-(a7)                        ; const bool loop
+        move.l  #SOUND_PAN_CENTER,-(a7)         ; const SoundPanning pan 
+        move.l  #SOUND_PCM_RATE_8000,-(a7)      ; const SoundPcmSampleRate rate
+        move.l  #SAMPLE_LENGTH_BYTES,-(a7)      ; const u32 len should be a multiple of 256
+        move.l  #india_8k,-(a7)                 ; const u8 *sample, should be 256 bytes boundary aligned
+        jsr     SND_PCM_startPlay
+        adda.l  #20,a7         ; restore stack
+
+        ELSE IF XGM_DRIVER_ENABLED
+        move.l  #1,-(a7)        ; push arg: bool waitReady #TODO: Why do we have to push a longword for a bool value?
+        jsr     XGM_loadDriver
+        addq.l  #4,a7           ; restore stack
+
+        ; TODO: Use XGM API
+
+        ENDIF
+
         lea     Variables,a5
 
         ; Enable vertical blanking interrupt
@@ -307,11 +343,6 @@ VBlankInterrupt:
 
 Exception:
         rte
-
-;---------------------------------------------------------------------------------------------
-; Calling a function from libmd causes the linker to pull in the each transient dependency
-; from the library, increasing the ROM size. 
-;       jsr     XGM_loadDriver
 
 ;---------------------------------------------------------------------------------------------
 ; Z80 machine code from https://blog.bigevilcorporation.co.uk/2012/03/09/sega-megadrive-3-awaking-the-beast/

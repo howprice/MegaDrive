@@ -1,6 +1,11 @@
 # TODO
 
-- [x] Fix VBCC toolchain build
+- [ ] Play XGM2 audio
+  - [ ] Modify ROM.s to init XGM2 driver
+  - [ ] Play tune from SGDK
+  - [ ] Convert Hoffman's tara.vgm to XGM2 (with rescomp)
+
+- [ ] Fix VBCC toolchain build
   - Main issue is -gc-all removing sections marked with KEEP
   - How to suppress hundreds of warning messages: Warning 64: Section libmd.a(vdp_tile.o)(.gnu.lto_.decls.5183536e) was not recognized by target linker script.
     Could use -nowarn=64, but might miss an important section. 
