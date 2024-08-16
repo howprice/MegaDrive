@@ -30,17 +30,17 @@ by --gc-sections. Sections linked in from libmd are free to be discarded if not 
 */
 SECTIONS
 {
-    /* Output RomHeader section at start of binary (relocation address 0) */
-    RomHeader :
-    {
-        KEEP(*(ROM_HEADER))
-
-        ASSERT(. == 512, "ROM header must be 512 bytes long");
-    } >rom
-
-    /* Output .text section immediately following header (offset 512) */
+    /* Output read-only .text section at start of rom (address 0) */
     .text : 
     {
+        /* Place 68000 exception vector table at the beginning of ROM. */
+        KEEP(*(ExceptionVectors))
+        ASSERT(. == 256, "Expect exception vectors table to be 256 bytes long");
+
+        /* ROM header */
+        KEEP(*(ROM_HEADER))
+        ASSERT(. == 512, "Expect header (including exception vectors table) to be 512 bytes long");
+
         /* --gc-sections requires an entry point to strip unused sections: 'start' symbol or first byte of .text section. */
         /* See https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html#SEC24 */
         KEEP(*(ROM_ENTRY))      /* ROM.s entry point code */
@@ -49,12 +49,9 @@ SECTIONS
         *(.text .text.*)        /* .text sections from C libraries (libmd, libgcc) */
         *(.rodata .rodata.*)    /* Read-only data sections from the C libraries */
 
-        /* PCM resource data is in the  .rodata_bin section */
-        /* Also: vlink error, not reported by ld. Error 112: libmd.a(xgm.o) (.text.XGM_stopPlay+0xeba2): Cannot resolve reference to stop_xgm, because section .rodata_bin was not recognized by the linker script. */
-        *(.rodata_bin)
-
-        /* XGM2 resource data is in the .rodata_binf section */
-        *(.rodata_binf)
+        /* Add read-only data to the .text section */
+        *(.rodata_bin)  /* PCM resource data is in the  .rodata_bin section */
+        *(.rodata_binf) /* XGM2 resource data is in the .rodata_binf section */
         
         /* Redundant assert. If the combined output sections directed to a region are too big for the region, the linker will issue an error message. */ 
         /* See https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html#SEC16 */
@@ -77,6 +74,8 @@ SECTIONS
     {
         KEEP(*(DATA))      /* DATA sections from assembly files e.g. ROM.o, GAME.o */
         *(.data .data.*)   /* .data sections from C libraries (libmd, libgcc) */
+
+        _romend = .; /* For ROM Header*/
     } >ram AT>rom
     _sdata = SIZEOF (.data); /* Size of output data section. Symbol required by SGDK */
 

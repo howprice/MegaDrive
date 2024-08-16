@@ -1,39 +1,6 @@
-; ------------------------------------------------------------------
-; Hardware equates
-; ------------------------------------------------------------------
 
-PALETTE_COLOUR_COUNT    EQU     16
-PALETTE_SIZE_LONGWORDS  EQU     PALETTE_COLOUR_COUNT/2
-
-VDP_DATA_PORT           EQU     $C00000
-VDP_CONTROL_PORT        EQU     $C00004
-
-RAM_ADDRESS             EQU     $FF0000
-RAM_SIZE_BYTES          EQU     $10000
-
-; ------------------------------------------------------------------
-; Handy macros
-; ------------------------------------------------------------------
-
-; \1 register number 0-23 (5 bits)
-; \2 data (8 bits)
-SET_VDP_REG     MACRO
-                move.w    #$8000!((\1)<<8)!((\2)&$FF),VDP_CONTROL_PORT  ; TODO: (\1)&$1F ?
-                ENDM
-
-; Set CRAM write address 0x00-0x7F (128 bytes = 4 palettes of 16 colours at 1 word per colour)
-; \1 address (6 bits)
-SET_CRAM_WRITE_ADDRESS  MACRO
-                        move.l    #($C0<<24)!((\1)<<16),VDP_CONTROL_PORT
-                        ENDM
-
-; ------------------------------------------------------------------
-; SGDK constants
-; TODO: Can the toolchain convert C constants be converted to assembler?
-; ------------------------------------------------------------------
-
-SOUND_PAN_CENTER        EQU $C0 ; See SGDK\inc\snd\sound.h #TODO: Is it possible to convert the SoundPanning enum values to assembler?
-SOUND_PCM_RATE_8000     EQU 5 ; See SGDK\inc\snd\pcm\snd_pcm.h #TODO: Is it possible to convert the SoundPcmSampleRate enum values to assembler?
+        INCLUDE "hardware.i"
+        INCLUDE "SGDK.i"
 
 ; ------------------------------------------------------------------
 ; Application constants
@@ -54,104 +21,7 @@ SAMPLE_LENGTH_BYTES     EQU 166912      ; TODO: How to get this from resources.h
 FrameIndex:     RS.L            1
 Vars_sizeof:    RS.W            1
 
-        SECTION ROM_HEADER,DATA
-
-; ------------------------------------------------------------------
-; Sega Megadrive ROM header
-; ------------------------------------------------------------------
-RomHeader:
-        dc.l   $00FFE000       ; Initial SSP
-        dc.l   start           ; Initial PC
-        dc.l   Exception       ; Bus error
-        dc.l   Exception       ; Address error
-        dc.l   Exception       ; Illegal instruction
-        dc.l   Exception       ; Division by zero
-        dc.l   Exception       ; CHK exception
-        dc.l   Exception       ; TRAPV exception
-        dc.l   Exception       ; Privilege violation
-        dc.l   Exception       ; TRACE exception
-        dc.l   Exception       ; Line-A emulator
-        dc.l   Exception       ; Line-F emulator
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Spurious exception
-        dc.l   Exception       ; IRQ level 1
-        dc.l   Exception       ; IRQ level 2
-        dc.l   Exception       ; IRQ level 3
-        dc.l   HBlankInterrupt ; IRQ level 4 (horizontal retrace interrupt)
-        dc.l   Exception       ; IRQ level 5
-        dc.l   VBlankInterrupt ; IRQ level 6 (vertical retrace interrupt)
-        dc.l   Exception       ; IRQ level 7
-        dc.l   Exception       ; TRAP #00 exception
-        dc.l   Exception       ; TRAP #01 exception
-        dc.l   Exception       ; TRAP #02 exception
-        dc.l   Exception       ; TRAP #03 exception
-        dc.l   Exception       ; TRAP #04 exception
-        dc.l   Exception       ; TRAP #05 exception
-        dc.l   Exception       ; TRAP #06 exception
-        dc.l   Exception       ; TRAP #07 exception
-        dc.l   Exception       ; TRAP #08 exception
-        dc.l   Exception       ; TRAP #09 exception
-        dc.l   Exception       ; TRAP #10 exception
-        dc.l   Exception       ; TRAP #11 exception
-        dc.l   Exception       ; TRAP #12 exception
-        dc.l   Exception       ; TRAP #13 exception
-        dc.l   Exception       ; TRAP #14 exception
-        dc.l   Exception       ; TRAP #15 exception
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        dc.l   Exception       ; Unused (reserved)
-        
-        dc.b "SEGA GENESIS    "                                 ; Console name
-        dc.b "(C)SEGA 1992.SEP"                                 ; Copyrght holder and release date
-        dc.b "METAL GEAR XGM2 AUDIO DEMO                      " ; Domestic name
-        dc.b "METAL GEAR XGM2 AUDIO DEMO                      " ; International name
-        dc.b "GM XXXXXXXX-XX"                                   ; Version number
-        dc.w $0000                                              ; Checksum (not read by boot code - don't worry about its value)
-        dc.b "J               "                                 ; I/O support
-        dc.l $00000000                                          ; Start address of ROM
-        dc.l RomEnd                                             ; End address of ROM
-        dc.l $00FF0000                                          ; Start address of RAM
-        dc.l $00FFFFFF                                          ; End address of RAM
-        dc.l $00000000                                          ; SRAM enabled
-        dc.l $00000000                                          ; Unused
-        dc.l $00000000                                          ; Start address of SRAM
-        dc.l $00000000                                          ; End address of SRAM
-        dc.l $00000000                                          ; Unused
-        dc.l $00000000                                          ; Unused
-        dc.b "                                        "         ; Notes (unused)
-        dc.b "JUE             "                                 ; Country codes
-
-;	PRINTT "ROM header size (bytes):"
-;	PRINTV *-RomHeader
-RomHeader_sizeof:
-        ASSERT *-RomHeader==512,"Expect ROM header to be 512 bytes"
-
 ;---------------------------------------------------------------------------------------------
-
         SECTION ROM_ENTRY,CODE
 
 ; The entry point doesn't have to be called 'start', but this symbol can be picked up by the
@@ -297,10 +167,14 @@ Main:
 .mainLoop: 
         bra.s   .mainLoop
         
-HBlankInterrupt:
+;---------------------------------------------------------------------------------------------
+; n.b. Use double colon to make the label externally visible to the linker (see VASM docs)
+HBlankInterrupt::
         rte
 
-VBlankInterrupt:
+;---------------------------------------------------------------------------------------------
+; n.b. Use double colon to make the label externally visible to the linker (see VASM docs)
+VBlankInterrupt::
         ; Increment frame index
         lea     FrameIndex(a5),a0
         IF USE_TEST_C
@@ -347,7 +221,7 @@ VBlankInterrupt:
 .skip        
         rte
 
-Exception:
+Exception::
         rte
 
 ;---------------------------------------------------------------------------------------------
@@ -425,11 +299,6 @@ Palette:
         dc.w $00A0 ; Colour D - Maroon
         dc.w $00c0 ; Colour E - Navy blue
         dc.w $00e0 ; Colour F - Dark green
-
-;---------------------------------------------------------------------------------------------
-
-RomEnd:    ; Very last line, end of ROM address
-; TODO: Assert that ROM does not exceed maximum size
 
 ;---------------------------------------------------------------------------------------------
 ; Initialised data section

@@ -31,13 +31,18 @@ rem list sections and symbols in test.o
 bin\objdump --section-headers %BUILD_DIR%\test.o
 rem bin\nm --numeric-sort %BUILD_DIR%\test.o
 
-echo Assembling ROM.s (with vasm)
-rem tools\vasm\Windows\x64\vasmm68k_mot is version 2.0beta. vbcc contains vasm 1.9
-tools\vasm\Windows\x64\vasmm68k_mot -D__GNUC__ -Felf -no-opt -o %BUILD_DIR%\ROM.o src\ROM.s || exit /b 1
+echo Assembling (with vasm)
+rem Use tools\vasm\Windows\x64\vasmm68k_mot version 2.0beta. vbcc contains older version vasm 1.9
+set ASM_FLAGS=-D__GNUC__ -Felf -no-opt
+tools\vasm\Windows\x64\vasmm68k_mot %ASM_FLAGS% -o %BUILD_DIR%\Vectors.o src\Vectors.s || exit /b 1
+tools\vasm\Windows\x64\vasmm68k_mot %ASM_FLAGS% -o %BUILD_DIR%\RomHeader.o src\RomHeader.s || exit /b 1
+tools\vasm\Windows\x64\vasmm68k_mot %ASM_FLAGS% -o %BUILD_DIR%\ROM.o src\ROM.s || exit /b 1
 
 rem list sections and symbols in ROM.o
+bin\objdump --section-headers %BUILD_DIR%\Vectors.o
+bin\objdump --section-headers %BUILD_DIR%\RomHeader.o
 bin\objdump --section-headers %BUILD_DIR%\ROM.o
-rem bin\nm --numeric-sort %BUILD_DIR%\ROM.o
+bin\nm --numeric-sort %BUILD_DIR%\ROM.o
 
 rem TODO: Add game.s
 rem echo Assembling game.s
@@ -51,7 +56,8 @@ rem Need to use --gc-sections to remove unused sections from libmd and libgcc. T
 rem Unfortunately, GNU ld ignores --gc-sections with OUTPUT_FORMAT(binary), so using elf32-m68k as intermediate format. See https://stackoverflow.com/a/48286388/5425146
 rem To list formats supported by ld.exe, use ld --help and search for "supported targets" and "supported emulations"
 rem Can use --print-gc-sections to see what sections are removed, but it produces a lot of output.
-bin\ld --oformat elf32-m68k -o %BUILD_DIR%/ROM.elf -T ROM.ls -Map %BUILD_DIR%/ROM.map %BUILD_DIR%/ROM.o %BUILD_DIR%/test.o data/resources.o -L lib -l md -l gcc --gc-sections || exit /b 1
+bin\ld --oformat elf32-m68k -o %BUILD_DIR%/ROM.elf -T ROM.ls -Map %BUILD_DIR%/ROM.map --gc-sections ^
+ %BUILD_DIR%/Vectors.o %BUILD_DIR%/RomHeader.o %BUILD_DIR%/ROM.o %BUILD_DIR%/test.o data/resources.o lib/libmd.a lib/libgcc.a || exit /b 1
 
 rem list sections and symbols in ROM.elf
 bin\objdump --section-headers %BUILD_DIR%\ROM.elf
