@@ -39,7 +39,7 @@
         {
             "label": "Build data",
             "type": "process",
-            "command": "data/build_data.bat",
+            "command": "build_data.bat",
             "problemMatcher": [],
             "group": "build",
             "presentation": {

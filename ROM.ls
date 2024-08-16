@@ -43,9 +43,9 @@ SECTIONS
 
         /* --gc-sections requires an entry point to strip unused sections: 'start' symbol or first byte of .text section. */
         /* See https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_3.html#SEC24 */
-        KEEP(*(ROM_ENTRY))      /* ROM.s entry point code */
+        KEEP(*(START))          /* Entry point code */
 
-        KEEP(*(CODE))           /* CODE from other assembly and C files: e.g. text.o ... */
+        KEEP(*(CODE))           /* CODE from other assembly and C files: e.g. main.o, text.o ... */
         *(.text .text.*)        /* .text sections from C libraries (libmd, libgcc) */
         *(.rodata .rodata.*)    /* Read-only data sections from the C libraries */
 
@@ -72,8 +72,8 @@ SECTIONS
     /* TODO: Why does AT() cause VLINK INTERNAL ERROR: next_pattern(): PHDR  load missing. */
     .data 0xFF0000 : 
     {
-        KEEP(*(DATA))      /* DATA sections from assembly files e.g. ROM.o, GAME.o */
-        *(.data .data.*)   /* .data sections from C libraries (libmd, libgcc) */
+        KEEP(*(DATA))      /* DATA sections from assembly files e.g. start.o, main.o */
+        *(.data .data.*)   /* .data sections from C e.g. test.o, libmd.a, libgcc.a */
 
         _romend = .; /* For ROM Header*/
     } >ram AT>rom
@@ -93,8 +93,4 @@ SECTIONS
 
         _bend = . ; /* Define symbol at end of .bss section. Required by SGDK. */
     } >ram
-
-    /* libmd/SGDK expects the main symbol. We won't be using this */
-    /* TODO: Try to remove this if can link at function level */
-    main = .; 
 }

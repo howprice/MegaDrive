@@ -3,6 +3,13 @@
 - BUG: XGM2 music plays very slow when Country is set to Europe in Regen emulator
   - Check correct playpack speed on both PAL and NTSC
 
+- Pass -fuse-linker-plugin to gcc when compiling
+  - This may be required to pull in liblto_plugin-0.dll, and maybe lto1.exe and lto-wrapper.exe
+
+- Go through ROM.map file and manually exclude any symbols that are not needed e.g. drv_null, drv_xgm, joy.o
+
+- Try other SGDK gcc options: -fno-web -fno-gcse -fno-unit-at-a-time 
+
 - Test playing PCM sound effects with XGM2 driver
 
 - Fix VBCC toolchain build

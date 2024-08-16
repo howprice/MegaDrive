@@ -39,11 +39,6 @@ rem list sections and symbols in ROM.o
 bin\objdump --section-headers %BUILD_DIR%\ROM.o
 bin\nm --numeric-sort %BUILD_DIR%\ROM.o
 
-rem TODO: Add game.s
-rem echo Assembling game.s
-rem tools\vasm\Windows\x64\vasmm68k_mot -Felf -no-opt -o %BUILD_DIR%\game.o src\game.s || exit /b 1
-rem bin\objdump --section-headers %BUILD_DIR%\game.o
-
 echo Linking
 rem The file format of an input object file is determined automatically by the linker. 
 rem The default output file format is compiled in to vlink (see -v) and may be changed by -b.
