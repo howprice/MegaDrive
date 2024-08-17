@@ -11,6 +11,7 @@ if not exist build_data (
 rem Convert resources to .s files (Standard Syntax)
 java -jar bin\rescomp.jar data\sample_data.res build_data\sample_data.s || exit /b 1
 java -jar bin\rescomp.jar data\tara.res build_data\tara.s || exit /b 1
+java -jar bin\rescomp.jar data\soundfx.res build_data\soundfx.s || exit /b 1
 
 rem Assemble resources.s to object file with GNU assembler. 
 rem Can't use vasmm68k_mot because rescomp generates assembly in Standard syntax rather than Motorola syntax
@@ -23,6 +24,10 @@ bin\nm --numeric-sort build_data\sample_data.o
 bin\gcc %FLAGS% -o build_data\tara.o build_data\tara.s || exit /b 1
 bin\objdump --section-headers build_data\tara.o
 bin\nm --numeric-sort build_data\tara.o
+
+bin\gcc %FLAGS% -o build_data\soundfx.o build_data\soundfx.s || exit /b 1
+bin\objdump --section-headers build_data\soundfx.o
+bin\nm --numeric-sort build_data\soundfx.o
 
 echo Data build succeeded
 exit /b 0

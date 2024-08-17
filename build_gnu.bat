@@ -59,7 +59,7 @@ rem To list formats supported by ld.exe, use ld --help and search for "supported
 rem Can use --print-gc-sections to see what sections are removed, but it produces a lot of output.
 bin\ld --oformat elf32-m68k -o %BUILD_DIR%/ROM.elf -T ROM.ls -Map %BUILD_DIR%/ROM.map --gc-sections ^
  %BUILD_DIR%/Vectors.o %BUILD_DIR%/RomHeader.o %BUILD_DIR%/start.o %BUILD_DIR%/main.o %BUILD_DIR%/test.o ^
- build_data/sample_data.o build_data/tara.o ^
+ build_data/sample_data.o build_data/tara.o build_data/soundfx.o ^
  lib/libmd.a lib/libgcc.a || exit /b 1
 
 rem list sections and symbols in ROM.elf

@@ -11,6 +11,12 @@
 
 USE_SGDK_RANDOM EQU 1
 
+; From soundfx.h (generate by rescomp)
+; TODO: Modify rescomp to add these labels to the generated .s file
+hat1_13k_size   = 9216
+snare1_13k_size = 8960
+cri_13k_size    = 7936
+
 ; ------------------------------------------------------------------
 ; Variable data structure definition
 ; ------------------------------------------------------------------
@@ -25,26 +31,39 @@ Vars_sizeof:    RS.W            1
 
 ; n.b. Use double colon to make the label externally visible to the linker (see VASM docs)
 main::
+        ; when calling a C function, all args are longwords and are pushed in reverse order to C function signature
+
+        ; Z80_loadDriver(Z80_DRIVER_XGM2, true);
         move.l  #1,-(a7)                ; push arg: bool waitReady #TODO: Why do we have to push a longword for a bool value?
         move.l  #Z80_DRIVER_XGM2,-(a7)  ; push arg: const u16 driver
         jsr     Z80_loadDriver          ; void Z80_loadDriver(const u16 driver, const bool waitReady);
-        addq.l  #8,a7                   ; restore stack
+        addq.l  #2*4,a7                 ; restore stack
 
         ; Workaround for SGDK bug: https://github.com/Stephane-D/SGDK/issues/345
         ; Need to manually call XGM2_setMusicTempo after loading the driver (even though it is called internally)
+        ; XGM2_setMusicTempo(60);
         move.l  #60,-(a7)               ; push arg: u16 value
         jsr     XGM2_setMusicTempo      ; void XGM2_setMusicTempo(const u16 value);
         addq.l  #4,a7                   ; restore stack
 
+        ; play track
+        ; XGM2_play(tara_xgm2)
         move.l  #tara_xgm2,-(a7)        ; const u8* song
         jsr     XGM2_play               ; XGM2_play(const u8 *song);
-        addq.l  #4,a7                   ; restore stack
+        addq.l  #1*4,a7                 ; restore stack
 
-        ; TODO: Play sound effect (periodically or on button press maybe) with XGM2_playPCM
+        ; If necessary, multiple tracks can be played with XGM2_load(const u8 *song) and XGM2_playTrack(const u16 track)
 
-        ; TODO: Support playing multiple tracks with  XGM2_load(const u8 *song) and XGM2_playTrack(const u16 track)
+        ; Play sound effect
+        ; TODO: Play periodically or on button press maybe
+        ; XGM2_playPCM(snare1_13k, sizeof(snare1_13k), SOUND_PCM_CH1)
+        move.l  #SOUND_PCM_CH1,-(a7)    ; const SoundPCMChannel channel
+        move.l  #snare1_13k_size,-(a7)  ; const u32 len
+        move.l  #snare1_13k,-(a7)       ; const u8* sample
+        jsr     XGM2_playPCM            ; void XGM2_playPCM(const u8 *sample, const u32 len, const SoundPCMChannel channel);
+        adda.l  #3*4,a7                 ; restore stack
 
-        lea     Variables,a5
+        lea     Variables,a5            ; Application variables bases address in A5 throughout
 
         ; Enable vertical blanking interrupt
         move.w   #$2000,sr      ; enable interrupts at CPU level. Vertical interrupt is 68000 level 6
