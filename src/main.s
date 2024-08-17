@@ -25,9 +25,16 @@ Vars_sizeof:    RS.W            1
 
 ; n.b. Use double colon to make the label externally visible to the linker (see VASM docs)
 main::
-        move.l  #1,-(a7)        ; push arg: bool waitReady #TODO: Why do we have to push a longword for a bool value?
-        jsr     XGM2_loadDriver
-        addq.l  #4,a7           ; restore stack
+        move.l  #1,-(a7)                ; push arg: bool waitReady #TODO: Why do we have to push a longword for a bool value?
+        move.l  #Z80_DRIVER_XGM2,-(a7)  ; push arg: const u16 driver
+        jsr     Z80_loadDriver          ; void Z80_loadDriver(const u16 driver, const bool waitReady);
+        addq.l  #8,a7                   ; restore stack
+
+        ; Workaround for SGDK bug: https://github.com/Stephane-D/SGDK/issues/345
+        ; Need to manually call XGM2_setMusicTempo after loading the driver (even though it is called internally)
+        move.l  #60,-(a7)               ; push arg: u16 value
+        jsr     XGM2_setMusicTempo      ; void XGM2_setMusicTempo(const u16 value);
+        addq.l  #4,a7                   ; restore stack
 
         move.l  #tara_xgm2,-(a7)        ; const u8* song
         jsr     XGM2_play               ; XGM2_play(const u8 *song);

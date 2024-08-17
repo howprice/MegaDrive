@@ -1,4 +1,4 @@
-[*.{asm,s}]
+[*.{asm,s,i}]
 charset = utf-8
 indent_style = spaces
 indent_size = 8
