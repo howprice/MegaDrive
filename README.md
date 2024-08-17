@@ -1,8 +1,20 @@
 # Mega Drive
 
-Goal: Build a ROM, written in assembly language using the SGDK driver to play audio.
+Sample project. Build a ROM, written in assembly language using the SGDK XGM2 driver to play audio.
 
-Driver: Hoffman uses XGM music driver with 4 channel sfx
+------------------------------------------------------------------------------------------------------
+
+# Instructions
+
+TODO: Number these when finished
+
+- Clone https://github.com/Stephane-D/SGDK
+- Modify SGDK/makelib.gen to add -ffunction-sections -fdata-sections to DEFAULT_FLAGS_LIB (See https://github.com/Stephane-D/SGDK/issues/346)
+- Follow [SGDK Installation](https://github.com/Stephane-D/SGDK/wiki/SGDK-Installation) instructions to build libmd.a: `make -f makelib.gen`
+- Copy SGDK/lib/libmd.a libgcc.a to this repo lib folder
+- Copy SGDK/bin folder to this repo bin
+
+------------------------------------------------------------------------------------------------------
 
 # Emulator
 

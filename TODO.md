@@ -1,6 +1,8 @@
 # TODO
 
-- Build latest SGDK repo (currently building 2.0 release)
+- Pass -fuse-linker-plugin to gcc when compiling
+  - This may be required to pull in liblto_plugin-0.dll, and maybe lto1.exe and lto-wrapper.exe
+  - May need to use --plugin=liblto_plugin.dll too
 
 - Update SGDK rescomp to add labels to WAV .s files to provide the size of each sample
   e.g. snare1_13k_size equ .-snare1_13k
@@ -11,12 +13,9 @@
   - How to suppress hundreds of warning messages: Warning 64: Section libmd.a(vdp_tile.o)(.gnu.lto_.decls.5183536e) was not recognized by target linker script.
     Could use -nowarn=64, but might miss an important section. 
 
-- Pass -fuse-linker-plugin to gcc when compiling
-  - This may be required to pull in liblto_plugin-0.dll, and maybe lto1.exe and lto-wrapper.exe
-
 - Go through ROM.map file and manually exclude any symbols that are not needed e.g. drv_null, drv_xgm, joy.o
 
-- Try other SGDK gcc options: -fno-web -fno-gcse -fno-unit-at-a-time 
+- Try other SGDK gcc options: -fno-web -fno-gcse
 
 - Is there anything in else the SGDK md.ld that is required? 
   - Maybe .stab or .stabstr (symbol tables?)
