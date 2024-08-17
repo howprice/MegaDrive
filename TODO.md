@@ -1,9 +1,5 @@
 # TODO
 
-- Pass -fuse-linker-plugin to gcc when compiling
-  - This may be required to pull in liblto_plugin-0.dll, and maybe lto1.exe and lto-wrapper.exe
-  - May need to use --plugin=liblto_plugin.dll too
-
 - Update SGDK rescomp to add labels to WAV .s files to provide the size of each sample
   e.g. snare1_13k_size equ .-snare1_13k
   - Add pull request to SGDK

@@ -22,8 +22,8 @@ rem TODO: Use other SGDK options? -fuse-linker-plugin -fno-web -fno-gcse -fno-un
 rem TODO: What is the -MMD option used by SGDK? See https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html
 bin\gcc -c -m68000 -Wall -Wextra -Werror -B bin ^
  -O3 ^
- -fomit-frame-pointer ^
- -ffunction-sections -fdata-sections -ffat-lto-objects -flto ^
+ -fomit-frame-pointer -fuse-linker-plugin -ffat-lto-objects -flto -flto=auto ^
+ -ffunction-sections -fdata-sections ^
  -o %BUILD_DIR%/test.o src/test.c || exit /b 1
 echo Compilation succeeded
 
