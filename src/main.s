@@ -11,12 +11,6 @@
 
 USE_SGDK_RANDOM EQU 1
 
-; From soundfx.h (generate by rescomp)
-; TODO: Modify rescomp to add these labels to the generated .s file
-hat1_13k_size   = 9216
-snare1_13k_size = 8960
-cri_13k_size    = 7936
-
 ; ------------------------------------------------------------------
 ; Variable data structure definition
 ; ------------------------------------------------------------------
@@ -55,11 +49,10 @@ main::
         ; If necessary, multiple tracks can be played with XGM2_load(const u8 *song) and XGM2_playTrack(const u16 track)
 
         ; Play sound effect
-        ; TODO: Play periodically or on button press maybe
         ; XGM2_playPCM(snare1_13k, sizeof(snare1_13k), SOUND_PCM_CH1)
         move.l  #SOUND_PCM_CH1,-(a7)    ; const SoundPCMChannel channel
-        move.l  #snare1_13k_size,-(a7)  ; const u32 len
-        move.l  #snare1_13k,-(a7)       ; const u8* sample
+        move.l  #cri_13k_size,-(a7)     ; const u32 len. Symbol exported from sample_data.o and resolved by linker
+        move.l  #cri_13k,-(a7)          ; const u8* sample. Symbol exported from sample_data.o and resolved by linker
         jsr     XGM2_playPCM            ; void XGM2_playPCM(const u8 *sample, const u32 len, const SoundPCMChannel channel);
         adda.l  #3*4,a7                 ; restore stack
 

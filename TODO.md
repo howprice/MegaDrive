@@ -1,9 +1,5 @@
 # TODO
 
-- Update SGDK rescomp to add labels to WAV .s files to provide the size of each sample
-  e.g. snare1_13k_size equ .-snare1_13k
-  - Add pull request to SGDK
-
 - Fix VBCC toolchain build (see Frank's latest email)
   - Main issue is -gc-all removing sections marked with KEEP
   - How to suppress hundreds of warning messages: Warning 64: Section libmd.a(vdp_tile.o)(.gnu.lto_.decls.5183536e) was not recognized by target linker script.

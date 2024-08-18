@@ -27,8 +27,13 @@ TODO: Number these when finished
 
 # References
 
+Toolchain:
+- [Everything You Never Wanted To Know About Linker Script](https://mcyoung.xyz/2021/06/01/linker-script/)
+- [Using ld The GNU linker](https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_toc.html), especially Memory Layout section
+- Latest [GNU Binutils list](https://sourceware.org/binutils/) [docs](https://sourceware.org/binutils/docs/)
+
+Mega Drive:
 - [Big Evil Corporation Megadrive Tutorial](https://blog.bigevilcorporation.co.uk/2012/02/28/sega-megadrive-1-getting-started/)
 - [Sega Mega Drive memory map](https://segaretro.org/Sega_Mega_Drive/Memory_map)
 - [Official Sega Genesis Technical Overview](http://xi6.com/files/sega2f.html)
-- [Using ld The GNU linker](https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_toc.html), especially Memory Layout section
 - Handy register equates and macros in [learning-megadrive repo](https://github.com/sroccaserra/learning-megadrive/blob/master/src/system.asm)
