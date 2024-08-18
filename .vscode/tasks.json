@@ -91,7 +91,8 @@
             "command": "run.bat",
             "args": [
                 "build_gnu",
-                "debug"
+                "debug",
+                "mame_debugger_script_gnu.txt"
             ],
             "problemMatcher": [],
             "presentation": {
@@ -109,7 +110,8 @@
             "command": "run.bat",
             "args": [
                 "build_vbcc",
-                "debug"
+                "debug",
+                "mame_debugger_script_vbcc.txt"
             ],
             "problemMatcher": [],
             "presentation": {

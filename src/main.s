@@ -111,7 +111,7 @@ Exception::
 ; Initialised data section
 ;---------------------------------------------------------------------------------------------
         SECTION DATA,DATA
-
+MainTestData::
         dc.l   $11111111
 
 ;---------------------------------------------------------------------------------------------
@@ -120,6 +120,7 @@ Exception::
         SECTION BSS,BSS
 
 ; n.b. Can't use fixed (ORG) address for variables, because have to co-exist in RAM with rw data
-; from other modules (e.g. test.s and libmd.a) in the final linked image 
-Variables:
+; from other modules (e.g. test.s and libmd.a) in the final linked image.
+; Use :: to make this an externally visible symbol, so can see its address in the linke map file.
+Variables::
         dcb.b   Vars_sizeof

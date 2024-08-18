@@ -1,8 +1,7 @@
 # TODO
 
-- Add instructions for how to use this repo
-
 - To reduce ROM size a little, go through ROM.map file and manually exclude any symbols that are not needed e.g. drv_null, drv_xgm, joy.o
+  - These are pulled in by the SGDK library due to code structure, but are not needed for this sample.
 
 - Try other SGDK gcc options: -fno-web -fno-gcse
 
@@ -15,9 +14,6 @@
 - Is there a way to remove the VBCC standard ABI _ prefix? Or is the STDCALL macro the best solution?
 
 # BONUS
-
-- Add symbols to mame debugger. See https://namelessalgorithm.com/genesis/blog/debug/
-  - Use vasm list and/or linker map file to generate MAME debugger script
 
 - Add some graphics
 

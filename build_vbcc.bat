@@ -78,4 +78,13 @@ rem tools\objcopy -O binary %BUILD_DIR%\ROM.elf %BUILD_DIR%\ROM.gen || exit /b 1
 
 echo Build succeeded
 
+where py > NUL 2>&1
+if %errorlevel% equ 0 (
+    echo Generating mame debugger script
+    py scripts\gen_mame_debugger_script_vbcc.py || exit /b 1
+    
+) else (
+    echo "Cannot generate mame debugger script: Python (py.exe) not found"
+)
+
 exit /b 0
