@@ -74,6 +74,9 @@ HBlankInterrupt::
 ;---------------------------------------------------------------------------------------------
 ; n.b. Use double colon to make the label externally visible to the linker (see VASM docs)
 VBlankInterrupt::
+
+        movem.l d0-d1/a0-a1,-(a7)       ; save registers
+
         ; Increment frame index
         lea     FrameIndex(a5),a0
 
@@ -102,6 +105,8 @@ VBlankInterrupt::
         ori.w   #$8700,d0       ; set register 7, background colour
         move.w  d0,VDP_CONTROL_PORT
 .skip        
+
+        movem.l (a7)+,d0-d1/a0-a1       ; restore registers
         rte
 
 Exception::
