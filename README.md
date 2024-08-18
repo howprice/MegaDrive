@@ -2,21 +2,16 @@
 
 Sample project. Build a ROM, written in assembly language using the SGDK XGM2 driver to play audio.
 
-------------------------------------------------------------------------------------------------------
+# Rebuilding libmd.a manually
 
-# Instructions
+Prebuilt libmd.a can be found in lib folder. To rebuild manually:
 
-TODO: Number these when finished
+1. Clone https://github.com/Stephane-D/SGDK
+2. Modify SGDK/makelib.gen to add -ffunction-sections -fdata-sections to DEFAULT_FLAGS_LIB (See https://github.com/Stephane-D/SGDK/issues/346)
+3. Follow [SGDK Installation](https://github.com/Stephane-D/SGDK/wiki/SGDK-Installation) instructions to build libmd.a: `make -f makelib.gen`
+4. Copy SGDK/lib/libmd.a libgcc.a to this repo lib folder
 
-- Clone https://github.com/Stephane-D/SGDK
-- Modify SGDK/makelib.gen to add -ffunction-sections -fdata-sections to DEFAULT_FLAGS_LIB (See https://github.com/Stephane-D/SGDK/issues/346)
-- Follow [SGDK Installation](https://github.com/Stephane-D/SGDK/wiki/SGDK-Installation) instructions to build libmd.a: `make -f makelib.gen`
-- Copy SGDK/lib/libmd.a libgcc.a to this repo lib folder
-- Copy SGDK/bin folder to this repo bin
-
-------------------------------------------------------------------------------------------------------
-
-# Emulator
+# Emulators
 
 - MAME is good for single stepping through the code
 - [Regen](http://aamirm.hacking-cult.org/www/regen.html) *debugger build* e.g. Regen 0.972*D*

@@ -2,6 +2,7 @@
 ; Application specific code
 ; ------------------------------------------------------------------
 
+        INCLUDE "macros.i"
         INCLUDE "hardware.i"
         INCLUDE "SGDK.i"
 
@@ -77,23 +78,12 @@ VBlankInterrupt::
         lea     FrameIndex(a5),a0
 
         ; call C function from our custom tools.c file
-        IFD __GNUC__
-        ; GCC calling conventinons
-        ; - Functions have their arguments pushed onto the stack before a call, last argument first. (This means within the functions, the arguments are sequential in memory in the order of the function signature.)
-        ; - Every function trashes a0, a1, d0, and d1. All other registers, including the stack pointer, are preserved and will leave the function the same way they entered it.
-        ; - Return values are passed in d0.
-        ; See https://bumbershootsoft.wordpress.com/2018/03/10/variations-on-the-68000-abi/ for more info
-        move.l  a0,-(a7)        ; push arg: frame index pointer
-        jsr     IncLong         ; call C function from our custom tools.c file
-        addq.l  #4,a7           ; restore stack
+        ; See STDCALL macro comments
+        move.l  a0,-(a7)                ; push arg: frame index pointer
+        STDCALL IncLong                 ; call C function from our custom tools.c file
+        addq.l  #4,a7                   ; restore stack
         lea     FrameIndex(a5),a0       ; a0 may have been trashed by the C function
-
-        ELSE ; VBCC
-        jsr     @IncLong        ; TODO: Try to configure VBCC to strip @ prefix
-
-        ENDIF
-
-        move.l  (a0),d0         ; frame index
+        move.l  (a0),d0                 ; frame index
 
         IF USE_SGDK_RANDOM ; cycle using random() C func from libmd.a
         ; change BG colour every 16 frames

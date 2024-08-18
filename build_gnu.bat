@@ -28,12 +28,13 @@ bin\gcc -c -m68000 -Wall -Wextra -Werror -B bin ^
 echo Compilation succeeded
 
 rem list sections and symbols in test.o
+rem objdump lists sections, nm lists symbols ("names")
 bin\objdump --section-headers %BUILD_DIR%\test.o
 rem bin\nm --numeric-sort %BUILD_DIR%\test.o
 
 rem Assemble .s files to .o files
 rem Use tools\vasm\Windows\x64\vasmm68k_mot version 2.0beta. vbcc contains older version vasm 1.9
-rem objdump lists sections, nm lists symbols ("names")
+
 echo Assembling (with vasm)
 set ASM_FLAGS=-D__GNUC__ -Felf -no-opt
 tools\vasm\Windows\x64\vasmm68k_mot %ASM_FLAGS% -o %BUILD_DIR%\Vectors.o src\Vectors.s || exit /b 1

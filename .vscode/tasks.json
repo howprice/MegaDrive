@@ -108,7 +108,7 @@
             "type": "process",
             "command": "run.bat",
             "args": [
-                "build_vbcct",
+                "build_vbcc",
                 "debug"
             ],
             "problemMatcher": [],

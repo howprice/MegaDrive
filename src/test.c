@@ -20,3 +20,8 @@ void DecLong(int *pVal)
 	s_decCountData++;
 	s_decCountBSS++;
 }
+
+long ArgsTest(char c, short s, int i, long l)
+{
+	return c + s + i + l;
+}

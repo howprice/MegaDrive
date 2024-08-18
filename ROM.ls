@@ -93,4 +93,8 @@ SECTIONS
 
         _bend = . ; /* Define symbol at end of .bss section. Required by SGDK. */
     } >ram
+
+    /* Discard LTO garbage sections to silence many many vlink messages e.g. Warning 64: Section libmd.a(types.o)(.gnu.lto_.inline.5f9446b6) was not recognized by target linker script. */
+    /* This does not seem to affect the final GCC build i.e. ld/gold LTO */
+    .garbage (NOLOAD): { *(.gnu.lto*) *(.comment) *(.debug*) } 
 }
