@@ -26,12 +26,12 @@ rem Don't do this. This compiles but does not assemble
 rem vbccm68k src\test.c || exit /b 1
 
 rem Preprocess, compile, and assemble, but don't link
+rem -c Do not link. Save the compiled files with .o suffix.
 rem The +config option is not used, so vc looks for custom vc.cfg in current directory.
 rem -fastcall uses the Fastcall-ABI which passes arguments in registers rather than the stack, and prefixes function names with a @ e.g. @IncLong
 rem Without fastcall, function names are prefixed with an underscore e.g. _IncLong
 rem TODO: Set warning level high and warnings as errors
-rem TODO: Enable optimization
-vc -c -o %BUILD_DIR%\test.o src\test.c || exit /b 1
+vc -c -O3 -o %BUILD_DIR%\test.o src\test.c || exit /b 1
 echo Compilation succeeded
 
 rem list sections and symbols in test.o
