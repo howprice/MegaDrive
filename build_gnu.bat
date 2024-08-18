@@ -8,6 +8,11 @@ setlocal
 rem Set the current directory to the location of the batch script, using the %0 parameter
 cd "%~dp0"
 
+if not exist build_gnu (
+	mkdir build_gnu
+	echo Created build_gnu directory
+)
+
 set BUILD_DIR=%CD%\build_gnu
 echo %BUILD_DIR%
 
