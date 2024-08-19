@@ -113,19 +113,29 @@ Exception::
         rte
 
 ;---------------------------------------------------------------------------------------------
-; Initialised data section
+; Constant read-only data can live in the CODE section
+; This will be placed in the ROM and remain in the ROM
 ;---------------------------------------------------------------------------------------------
-        SECTION DATA,DATA
-MainTestData::
+ConstantData::
         dc.l   $11111111
 
 ;---------------------------------------------------------------------------------------------
-; Uninitialised data section
+; Initialised read/write data section
+; This will be placed in the ROM and copied into RAM at startup
+;---------------------------------------------------------------------------------------------
+        SECTION DATA,DATA
+MainTestData::
+        dc.l   $22222222
+
+;---------------------------------------------------------------------------------------------
+; Uninitialised read/write data section
+; This takes up no space in the rom. Linker will allocate space for this in RAM. It will be 
+; zeroed out at startup.
 ;---------------------------------------------------------------------------------------------
         SECTION BSS,BSS
 
 ; n.b. Can't use fixed (ORG) address for variables, because have to co-exist in RAM with rw data
 ; from other modules (e.g. test.s and libmd.a) in the final linked image.
-; Use :: to make this an externally visible symbol, so can see its address in the linke map file.
+; Use :: to make this an externally visible symbol, so can see its address in the linker map file.
 Variables::
         dcb.b   Vars_sizeof

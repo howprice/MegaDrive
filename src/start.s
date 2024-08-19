@@ -101,7 +101,7 @@ Main:
         ; Set CRAM address 0 for palette zero
         SET_CRAM_WRITE_ADDRESS  $0000
 
-        lea     Palette,a0
+        lea     Palette(pc),a0
         move.l  #PALETTE_SIZE_LONGWORDS-1,d0 ; copy 2 colours (1 longword) at a time, -1 for dbra
 .paletteLoop:
         move.l  (a0)+,VDP_DATA_PORT     ; note autoincrement is set to 2

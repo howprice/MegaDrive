@@ -48,6 +48,62 @@ To rebuild manually:
 3. Follow [SGDK Installation](https://github.com/Stephane-D/SGDK/wiki/SGDK-Installation) instructions to build libmd.a: `make -f makelib.gen`
 4. Copy SGDK/lib/libmd.a libgcc.a to this repo's lib folder
 
+# What to stick where
+
+If you are writing in assembly language:
+
+Code (instructions) should be in asm `CODE` sections. This will be placed in the ROM following the 68000 exception vector table and Mega Drive ROM header.
+
+```
+        SECTION CODE,CODE
+
+        move.w   #$2700,sr
+        ...
+
+```
+
+Constant data should be placed in asm `CODE` (or `.rodata`) sections. This will be placed in the ROM with code, or after code and remain in the ROM.
+
+```
+        SECTION CODE,CODE
+        ...
+        lea     Palette(pc),a0  ; can use PC-relative addressing to access nearby data in same section
+        ...
+        dbra    d0,.paletteLoop
+        jmp     main
+Palette:
+        dc.w $0000 ; Colour 0 - Transparent
+        dc.w $0002 ; Colour 1 - Red
+        ...
+```
+
+or
+
+```        
+        SECTION .rodata,CODE
+Palette:
+        dc.w    $0000 ; Colour 0 - Transparent
+        dc.w    $0002 ; Colour 1 - Red
+```
+
+"Data" means pre-initialised, non-zero, read-write data. Place this in DATA sections. This will be stored in ROM following code and read-only data and is copied to RAM at startup.
+
+```
+        SECTION DATA,DATA
+Flags:
+        dc.l    $8000001 
+```
+
+BSS means uninitialised (zero), read-write data. This takes up no space in the ROM. The Linker will allocate an address for BSS vars in RAM. It is zeroed at startup.
+
+```
+        SECTION BSS,BSS
+Variables:
+        dcb.b   Vars_sizeof
+FrameCount:
+        ds.l    0
+```
+
 # Thanks and credits
 
 - [Stephane Dallongeville](https://github.com/Stephane-D) for the amazing SGDK
