@@ -48,14 +48,12 @@ To rebuild manually:
 3. Follow [SGDK Installation](https://github.com/Stephane-D/SGDK/wiki/SGDK-Installation) instructions to build libmd.a: `make -f makelib.gen`
 4. Copy SGDK/lib/libmd.a libgcc.a to this repo's lib folder
 
-# Emulators
+# Thanks and credits
 
-- MAME is good for single stepping through the code
-- [Regen](http://aamirm.hacking-cult.org/www/regen.html) *debugger build* e.g. Regen 0.972*D*
-
-# Tools
-
-- [objdump](https://web.mit.edu/gnu/doc/html/binutils_5.html) - Display information from object files. Windows exe in SGDK
+- [Stephane Dallongeville](https://github.com/Stephane-D) for the amazing SGDK
+- [djh0ffman](https://hoffman.home.blog/links/) and [TTE](https://www.twitch.tv/djh0ffman) for this fun task and dupport
+- [Frank  Wille](http://sun.hasenbraten.de/~frank/) for the VBCC toolchain and amazing support
+- [Ice Dragon Dee](https://itaku.ee/profile/icedragondee) for the cool music
 
 # References
 
@@ -65,12 +63,19 @@ Toolchain:
 - [VASM](http://sun.hasenbraten.de/vasm/)
 - [VLink](http://sun.hasenbraten.de/vlink/)
 - [SGDK](https://github.com/Stephane-D/SGDK)
-- [Everything You Never Wanted To Know About Linker Script](https://mcyoung.xyz/2021/06/01/linker-script/)
+- [Everything You Never Wanted To Know About Linker Script](https://mcyoung.xyz/2021/06/01/linker-script/) by Miguel Young de la Sota aka [mcyoung](https://mcyoung.xyz/)
 - [Using ld The GNU linker](https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_chapter/ld_toc.html), especially Memory Layout section
-- Latest [GNU Binutils list](https://sourceware.org/binutils/) [docs](https://sourceware.org/binutils/docs/)
+- [GNU Binutils list](https://sourceware.org/binutils/) and [docs](https://sourceware.org/binutils/docs/)
 
 Mega Drive:
+- [Official Sega Genesis Technical Overview](http://xi6.com/files/sega2f.html)
+- [Sega, Sega megadrive maintenance manual](https://www.docdroid.net/nJuzlS2/mega-drive-maintenance-manual-pal-g-august-1992-rev-a-pdf)
+- [Mega Drive / Genesis Architecture A practical analysis by Rodrigo Copetti](https://www.copetti.org/writings/consoles/mega-drive-genesis/)
 - [Big Evil Corporation Megadrive Tutorial](https://blog.bigevilcorporation.co.uk/2012/02/28/sega-megadrive-1-getting-started/)
 - [Sega Mega Drive memory map](https://segaretro.org/Sega_Mega_Drive/Memory_map)
-- [Official Sega Genesis Technical Overview](http://xi6.com/files/sega2f.html)
-- Handy register equates and macros in [learning-megadrive repo](https://github.com/sroccaserra/learning-megadrive/blob/master/src/system.asm)
+- [learning-megadrive repo](https://github.com/sroccaserra/learning-megadrive/blob/master/src/system.asm)
+
+# Emulators
+
+- MAME is good for single stepping through the code
+- [Regen](http://aamirm.hacking-cult.org/www/regen.html) *debugger build* e.g. Regen 0.972*D*
