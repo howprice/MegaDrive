@@ -13,7 +13,7 @@ GCC compiler and libgcc are under GNU license (GPL3) and any software build from
 
 A vscode tasks.json file is included for convenience. It includes task to build the ROM using either the GNU or VBCC toolchains and to run the ROM in the Mame emulator/debugger.
 
-Python (py) must be available to generate the MAME debugger script to add symbols as comments.
+If Python (py) is available, MAME debugger scripts will be generated which add symbols as comments.
 
 ## GNU Toolchain
 
